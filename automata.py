@@ -268,7 +268,7 @@ class Non_deterministic_automata:
                 G.add_node(state.get_state_label(), shape='doublecircle',color='red',order=len(self.states))
             
             elif state in self.initial_states:
-                G.add_node(state.get_state_label(),shape='circle',color='red')
+                G.add_node(state.get_state_label(),shape='circle')
                 G.add_node('null', style ='invisible')
                 G.add_edge('null', state.get_state_label(),len = 0.5)
             else:
@@ -290,7 +290,7 @@ class Non_deterministic_automata:
         G.edge_attr['fontname'] = 'Helvetica,Arial,sans-serif'
 
         # Save the graph to a file
-        G.graph_attr.update(dpi='300', size='10', nodesep='0.5')
+        G.graph_attr.update(dpi='300', size='15', nodesep='0.4')
         G.layout(prog='dot')
         G.draw(f"images/{self.get_automata_id()}.png")
         print("Finite state machine graph saved")
@@ -320,7 +320,7 @@ class Non_deterministic_automata:
         related_transitions = self.get_transitions_from_state(state)
         return [transition.get_transition_litteral() for transition in related_transitions]
 
-    def get_possible_symbols_from_state(self,state : State) -> list[chr]:
+    def get_possible_symbols_from_state(self,state : State) -> list[str]:
         related_transition_litterals = self.get_transition_litterals_from_state(state)
         symbols_from_state = []
         for related_transition in related_transition_litterals:
@@ -337,8 +337,15 @@ class Non_deterministic_automata:
         
         return dict
 
-    def get_state_by_label(label : str) -> State:
-        pass
+    def get_state_by_label(self,label : str) -> State:
+        table =self.get_dict_label_state()
+
+        if label in table.keys():
+            state = table[label]
+        else:
+            raise IndexError("Thius key does not exist")
+
+        return state
     
     def reachable_states_table(self) -> dict:
         """
@@ -413,7 +420,16 @@ class Non_deterministic_automata:
 
         return table
 
+    def reachable_states_from_sym(self,label : str , sym : str):
+        tuple_transition = (label,sym)
 
+        delta = self.transition_function()
+        result = []
+        for transition in delta:
+            if transition[0] == tuple_transition:
+                result.append(transition[1])
+        
+        return result
     
 
     def get_power_set_of_states(self) -> list[set[str]]:
