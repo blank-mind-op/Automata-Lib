@@ -1,4 +1,4 @@
-# Methods
+# Main Methods
 
 ## class Alphabet:
 

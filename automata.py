@@ -3,12 +3,12 @@ import pygraphviz as pgv
 import matplotlib.pyplot as plt
 import math
 
-#TODO: Add some special chars
+
 
 epsilon = '\u03B5'
 empty_set = '\u2205'
 
-#TODO : Create the alphabet class
+
 
 class Alphabet:
     """
@@ -56,7 +56,7 @@ class Alphabet:
             print(f"Element does not exist: {e}")
 
 
-#TODO : create the state class
+
 
 possible_states = {0:'start',1:'end',2:'normal'}
 
@@ -128,14 +128,14 @@ class State:
     
 
 
-#TODO:create the transitio class
+
 
 class Transition:
     def __init__(self, origin_state : State ,label :str ,  destination_state : State , alphabet : Alphabet) -> None:
         self.transition_id = uuid.uuid4().hex
         self.origin_state = origin_state
 
-        if label not in alphabet.get_symbols():
+        if label not in alphabet.get_symbols() and label != epsilon:
             raise ValueError('This symbol does not belong to the alphabet')
         else:
             self.label = label
@@ -189,8 +189,9 @@ class Transition:
         else:
             self.label = new_label
     
+    
 
-#TODO:craete the non deterministic automata class and all the related functions
+
 
 class Non_deterministic_automata:
     def __init__(self,alphabet :Alphabet , states : set[State], initial_states : set[State] , accept_states : set[State] , transitions : set[Transition]) -> None:
@@ -219,7 +220,7 @@ class Non_deterministic_automata:
     def get_transitions(self) -> set[Transition]:
         return self.transitions
     
-    # methods related to transitions
+    
     def add_transition(self,new_transition :Transition) ->None:
         self.transitions.add(new_transition)
     
@@ -232,7 +233,7 @@ class Non_deterministic_automata:
     def get_transition_list(self) -> list[tuple]:
         return [transition.get_transition_litteral() for transition in self.transitions]
 
-    # methods related to states
+    
     def get_initial_states_list(self) -> list[str]:
         return [state.get_state_label() for state in self.initial_states]
     
@@ -251,13 +252,13 @@ class Non_deterministic_automata:
         except (KeyError, TypeError) as e:
             raise ValueError(f"This state does not exist: {e}")
 
-    # methods related to the automata itself
+    
 
     def render_automata(self):
 
         G = pgv.AGraph(strict=False, directed=True,center = True)
 
-        #Adding all the states
+        
 
         for state in self.states:
             if state in self.accept_states and state in self.initial_states:
@@ -274,7 +275,7 @@ class Non_deterministic_automata:
             else:
                 G.add_node(state.get_state_label(), shape='circle')
             
-        #Adding all the transitions
+        
 
         for transition in self.transitions:
             origin_state = transition.get_tansition_origin_state()
@@ -282,20 +283,20 @@ class Non_deterministic_automata:
             transition_label = transition.get_transition_label()
             G.add_edge(origin_state.get_state_label(), destination_state.get_state_label(), label=transition_label)
             
-        #Setting graph attributes
+        
 
         G.graph_attr['rankdir'] = 'LR'
         G.graph_attr['fontname'] = 'Helvetica,Arial,sans-serif'
         G.node_attr['fontname'] = 'Helvetica,Arial,sans-serif'
         G.edge_attr['fontname'] = 'Helvetica,Arial,sans-serif'
 
-        # Save the graph to a file
+        
         G.graph_attr.update(dpi='300', size='15', nodesep='0.4')
         G.layout(prog='dot')
         G.draw(f"images/{self.get_automata_id()}.png")
         print("Finite state machine graph saved")
 
-        # Display the graph using matplotlib (optional)
+        
         plt.figure(figsize=(8, 6))
         plt.imshow(plt.imread(f'images/{self.get_automata_id()}.png'))
         plt.axis('off')
@@ -361,23 +362,23 @@ class Non_deterministic_automata:
         states = self.get_states()
         symbols = self.alphabet.get_symbols()
 
-        # Initialize the table
+        
         table = {}
 
-        # Iterate through each state in the given set of states
+        
         for state in states:
-            # Initialize the reachable states set for the current state
+            
             reachable_states = set()
 
-            # Get the transitions from the current state for each symbol in the alphabet
+            
             for symbol in symbols:
                 transitions = self.get_transitions_from_state(state)
                 for transition in transitions:
                     if transition.get_transition_label() == symbol:
-                        # Add the destination state of the transition to the reachable states set
+                        
                         reachable_states.add(transition.get_transition_destination_state())
 
-            # Add the reachable states set to the table for the current state
+            
             table[state] = reachable_states
 
         return table
@@ -396,26 +397,26 @@ class Non_deterministic_automata:
         """
         state_labels = self.get_initial_states_list()
         symbols = self.alphabet.get_symbols()
-        # Initialize the table
+        
         table = {}
 
-        # Iterate through each state label in the given set of state labels
+        
         for state_label in state_labels:
-            # Initialize the reachable state labels set for the current state label
+            
             reachable_state_labels = set()
 
-            # Get the state object corresponding to the current state label
+            
             state = self.get_state_by_label(state_label)
 
-            # Get the transitions from the current state for each symbol in the alphabet
+            
             for symbol in symbols:
                 transitions = self.get_transitions_from_state(state)
                 for transition in transitions:
                     if transition.get_transition_label() == symbol:
-                        # Add the destination state label of the transition to the reachable state labels set
+                        
                         reachable_state_labels.add(transition.get_transition_destination_state().get_state_label())
 
-            # Add the reachable state labels set to the table for the current state label
+            
             table[state_label] = reachable_state_labels
 
         return table
@@ -447,27 +448,24 @@ class Non_deterministic_automata:
             power_set.append(subset)
         
         return power_set
-
-    def is_str_accepted(self, string : str) -> bool:
-        pass
-        
+    
 
 
-# TODO: cretate children classes of the automata class
 
-# Deterministic finite automata
+
+
 
 class Deterministic_automata(Non_deterministic_automata):
-    def __init__(self, alphabet: Alphabet, states: set[State], initial_states: State, accept_states: set[State], transitions: set[Transition]) -> None:
+    def __init__(self, alphabet: Alphabet, states: set[State], initial_states: set[State], accept_states: set[State], transitions: set[Transition]) -> None:
 
-        #checking the alphabet
+        
 
-        if epsilon in  alphabet.get_symbols():
+        if epsilon in alphabet.get_symbols():
             raise ValueError(f'A finite state automata cannot use {epsilon} as a caracter')
         else:
             self.alphabet = alphabet
 
-        #checking the transitions
+        
         transition_list = [transition.get_transition_litteral() for transition in transitions]
         transitions_dict = {}
 
@@ -479,11 +477,13 @@ class Deterministic_automata(Non_deterministic_automata):
         else:
             raise ValueError('the list of transitions is incompatible with a finite automata (there exist a couple (state,symbol) with more than one destination)')
         
-        super().__init__(alphabet,states, initial_states, accept_states,transitions)
-    # Need to override this method
-    def is_str_accepted(self, string: str) -> bool:
-        return super().is_str_accepted(string)
+        if len(initial_states) != 1:
+            raise ValueError('A deterministic finite automata can only have one initial state')
+        else:
+            self.initial_states = initial_states 
 
+        super().__init__(alphabet,states, initial_states, accept_states,transitions)
+    
 
 
 
