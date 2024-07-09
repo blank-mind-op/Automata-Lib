@@ -3,43 +3,43 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.colors import ListedColormap
 
-# Parameters
+
 width, height = 200, 200
 days = 400
 P = 0.15
 pa = 0.05
-T1 = 20
-T2 = 10
+T1 = 150
 u = 0.5
-T3 = 14
-k = 0.02
+T2 = (1-u)**(-1)
+k = 0.2
+T3 = (1-k)**(-1)
 q = 0.6
 
-# State constants
+
 S, I, Ia, C, R, H, D = 0, 1, 2, 3, 4, 5, 6
 
-# Initialize grid
+
 grid = np.zeros((width, height), dtype=int)
 initial_infected = 10
 infected_indices = np.random.choice(width * height, initial_infected, replace=False)
 grid.flat[infected_indices] = I
 
-# Function to get neighbors
+
 def get_neighbors(x, y):
     neighbors = [(i, j) for i in range(x-1, x+2) for j in range(y-1, y+2) if 0 <= i < width and 0 <= j < height and (i, j) != (x, y)]
     return neighbors
 
-# Simplified r_values and immunity arrays
+
 r_values = np.random.uniform(0, 1, (width, height))
 immunity = np.random.uniform(0, 1, (width, height))
 
-# Function to calculate probability
+
 def calculate_probability(grid, x, y, r_values, immunity):
     neighbors = get_neighbors(x, y)
     total_probability = 0
 
     for nx, ny in neighbors:
-        distance_factor = 1 if (nx == x or ny == y) else 1 / np.sqrt(2)
+        distance_factor = 1 if(nx == x or ny == y) else 1/np.sqrt(2)
         infectivity = np.sqrt(r_values[nx, ny])
         susceptibility = 1 - immunity[x, y]
         P_ij_mn = infectivity * susceptibility
@@ -48,7 +48,7 @@ def calculate_probability(grid, x, y, r_values, immunity):
     probability = total_probability / len(neighbors)
     return probability
 
-# Function to update grid
+
 def update_grid(grid, r_values, immunity):
     new_grid = grid.copy()
     for x in range(width):
@@ -75,13 +75,18 @@ def update_grid(grid, r_values, immunity):
                     new_grid[x, y] = D
                 elif np.random.rand() < 1 / T3:
                     new_grid[x, y] = R
+            elif grid[x, y] == Ia:
+                if np.random.rand() < 1/(T1 + T2):
+                    new_grid[x, y] = R
+                elif np.random.rand() < 1 / T3:
+                    new_grid[x, y] = Ia
     return new_grid
 
-# Initialize data storage for the simulation
+
 grids = [grid]
 counts = {S: [], I: [], Ia: [], C: [], R: [], H: [], D: []}
 
-# Run the simulation
+
 for day in range(days):
     grid = update_grid(grid, r_values, immunity)
     grids.append(grid)
